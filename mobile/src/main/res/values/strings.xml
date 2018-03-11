@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">SMARS</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="remote_controller">Remote Controller</string>
+    <string name="gyro_controller">Gyro Controller</string>
+    <string name="go_alone">Go Alone</string>
+
+    <string name="connect_to">Connect to</string>
+    <string name="add">Add</string>
+    <string name="scan">Scan</string>
+    <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
+    <string name="ble_not_supported">BLE is not supported</string>
+    <string name="unknown">Unknown</string>
+    <string name="devices_found">Devices found</string>
+    <string name="failed_to_connect">Connection failed. Is it really a rover?</string>
+
+</resources>
