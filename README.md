@@ -1,8 +1,6 @@
 # ATRover
 This is a small project to make a rover with Android Things and a Raspberry Pi 3.
-It is controlled with Bluetooth and an Android app included in the **mobile** module. 
-For now, it used Bluetooth LE to control the rover but it reveals quite inefficent.
-Replacing BLE by normal Bluetooth will comming soon.
+It is controlled with Bluetooth and an Android app included in the **mobile** module.
 
 
 # Hardware (Deprecated)
