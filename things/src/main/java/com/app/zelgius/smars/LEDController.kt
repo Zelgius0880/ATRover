@@ -3,18 +3,17 @@ package com.app.zelgius.smars
 import android.os.Handler
 import com.google.android.things.pio.Gpio
 import com.google.android.things.pio.PeripheralManager
-import com.google.android.things.pio.Pwm
 import java.io.IOException
 
 
 class LEDController {
     private val service = PeripheralManager.getInstance()
-    var red: PwmLed
-    var blue: PwmLed
-    val green: Gpio
+    var red: Gpio
+    var blue: Gpio
+    var green: Gpio
 
-    private val pwm0: Pwm //Blue
-    private val pwm1: Pwm //Red
+    var speed = Speed.MEDIUM
+
 
     var light: Boolean = false
     set(value) {
@@ -22,35 +21,23 @@ class LEDController {
         enableLight(field)
     }
 
-    var pwmDuty = 100.0
-    var increment = 1
-    val pulseLeds: MutableList<Pwm> = mutableListOf()
+    val leds: MutableList<Gpio> = mutableListOf()
+    val ledsEnabled = mutableListOf<LED>()
 
     private val pulseHandler = Handler()
 
-    var pulseSpeed = Speed.FAST
 
     init {
         try {
             green = service.openGpio(BoardDefaults.ledGreen)
-            green?.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW)
+            green.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW)
 
-            pwm0 = service.openPwm("PWM0")
+            blue = service.openGpio(BoardDefaults.ledBlue)
+            blue.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW)
 
-            pwm1 = service.openPwm("PWM1")
+            red = service.openGpio(BoardDefaults.ledRed)
+            red.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW)
 
-            pwm0?.setPwmFrequencyHz(580.0)
-            pwm0?.setPwmDutyCycle(0.0)
-            // Enable the PWM signal
-            pwm0?.setEnabled(true)
-
-            pwm1.setPwmFrequencyHz(580.0)
-            pwm1.setPwmDutyCycle(0.0)
-            // Enable the PWM signal
-            pwm1.setEnabled(true)
-
-            blue = PwmLed(pwm0)
-            red = PwmLed(pwm1)
         } catch (e: IOException) {
             throw e
         }
@@ -59,95 +46,88 @@ class LEDController {
     @Throws(IOException::class)
     fun close() {
         green.close()
-        pwm0.close()
-        pwm1.close()
+        blue.close()
+        red.close()
     }
 
-    fun blink(vararg leds: LED) {
+    fun blink(vararg leds: LED, speed: Speed = Speed.MEDIUM) {
+        this.leds.clear()
         leds.forEach {
             when (it) {
-                LED.GREEN -> green.value.let {
-                    green.value = !it
+                LED.GREEN -> {
+                    this.leds.add(green)
+                    green.value.let {
+                        green.value = !it
+                    }
                 }
-                LED.BLUE -> blue.value.let {
-                    blue.value = !it
+                LED.BLUE -> {
+                    this.leds.add(blue)
+                    blue.value.let {
+                        blue.value = !it
+                    }
                 }
-                LED.RED -> red.value.let {
-                    red.value = !it
+                LED.RED -> {
+                    this.leds.add(red)
+                    red.value.let {
+                        red.value = !it
+                    }
                 }
             }
-
         }
+
+        this.speed = speed
+        pulseHandler.postDelayed(blinkRunnable, speed.ms)
     }
 
-    fun pulse(speed: Speed, vararg leds: LED) {
-        pulseHandler.removeCallbacks(pulseRunnable)
-        pwmDuty = 100.0
+    fun enable(vararg leds: LED) {
+        red.value = false
+        green.value = false
+        blue.value = false
 
-        pulseSpeed = speed
-
-        pulseLeds.clear()
+        ledsEnabled.clear()
+        ledsEnabled.addAll(leds)
         leds.forEach {
-            val pwm = when (it) {
-                LED.BLUE -> pwm0
-                LED.RED -> pwm1
-                else -> throw IllegalStateException("Unknown Pwm LED $it")
+            when (it) {
+                LED.GREEN -> {
+                    this.leds.add(green)
+                    green.value = true
+                }
+                LED.BLUE -> {
+                    this.leds.add(blue)
+                    blue.value = true
+                }
+                LED.RED -> {
+                    this.leds.add(red)
+                    red.value = true
+                }
             }
-            if (!pulseLeds.contains(pwm)) pulseLeds.add(pwm)
         }
-        pulseHandler.postDelayed(pulseRunnable, speed.ms)
     }
 
-    private val pulseRunnable = object : Runnable {
+    private val blinkRunnable = object : Runnable {
         override fun run() {
-            pulseLeds.forEach {
-                it.setPwmDutyCycle(pwmDuty)
+            leds.forEach {
+                it.value = !it.value
             }
 
-            pwmDuty += increment
-            if (pwmDuty <= 0) {
-                increment = 1
-                pwmDuty = 0.0
-            } else if (pwmDuty >= 100) {
-                increment = -1
-                pwmDuty = 100.0
-            }
-            pulseHandler.postDelayed(this, pulseSpeed.ms)
-
+            pulseHandler.postDelayed(this, speed.ms)
         }
     }
 
     private fun enableLight(value: Boolean){
-        if(value){
-            stopPulse()
-        }
         red.value = value
         green.value = value
         blue.value = value
 
-    }
-
-    fun stopPulse() {
-        pulseLeds.forEach {
-            it.setPwmDutyCycle(0.0)
+        if(!value){
+            enable(*ledsEnabled.toTypedArray())
         }
-        pulseLeds.clear()
-        pulseHandler.removeCallbacks(pulseRunnable)
-    }
-
-    class PwmLed(private val pwm: Pwm) {
-        var value: Boolean = false
-            set(value) {
-                field = value
-                pwm.setPwmDutyCycle(if (value) 100.0 else 0.0)
-            }
     }
 }
 
 enum class LED {
     GREEN, BLUE, RED
 }
-
 
 enum class Speed(val ms: Long) {
     LOW(50L), MEDIUM(25L), FAST(10L)

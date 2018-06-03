@@ -7,62 +7,82 @@
 
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/forward"
-        android:layout_width="95dp"
-        android:layout_height="95dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:clickable="true"
-        android:src="@drawable/ic_keyboard_arrow_up_black_24dp"
-        app:layout_constraintBottom_toTopOf="@+id/backward"
-        app:layout_constraintEnd_toStartOf="@+id/right"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/left"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/backward"
-        android:layout_width="95dp"
-        android:layout_height="95dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:clickable="true"
-        android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
+    <View
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/grid"
+        android:elevation="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/right"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/left"
-        app:layout_constraintTop_toBottomOf="@+id/forward" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/left"
-        android:layout_width="95dp"
-        android:layout_height="95dp"
-        android:layout_marginStart="8dp"
-        android:clickable="true"
-        android:src="@drawable/ic_keyboard_arrow_left_black_24dp"
-        app:layout_constraintBottom_toTopOf="@+id/backward"
-        app:layout_constraintEnd_toStartOf="@+id/right"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/forward" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/right"
-        android:layout_width="95dp"
-        android:layout_height="95dp"
+    <com.app.zelgius.smars.Joystick
+        android:id="@+id/joystick"
+        android:layout_width="300dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:elevation="17dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" >
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/remote"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:layout_marginBottom="32dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            app:backgroundTint="@color/colorPrimaryDark"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </com.app.zelgius.smars.Joystick>
+
+    <TextView
+        android:id="@+id/angleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:clickable="true"
-        android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
-        app:layout_constraintBottom_toTopOf="@+id/backward"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/left"
-        app:layout_constraintTop_toBottomOf="@+id/forward" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/powerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/angleText"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
 </android.support.constraint.ConstraintLayout>

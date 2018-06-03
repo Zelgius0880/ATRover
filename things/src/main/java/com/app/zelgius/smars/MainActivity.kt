@@ -1,13 +1,29 @@
 package com.app.zelgius.smars
 
 import android.app.Activity
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
-import android.content.ContentValues.TAG
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Handler
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import com.app.zelgius.shared.BluetoothInfo
+import com.app.zelgius.shared.BluetoothListener
+import com.app.zelgius.shared.ClientThread
+import com.google.android.things.bluetooth.BluetoothClassFactory
+import com.google.android.things.bluetooth.BluetoothConfigManager
+import com.google.android.things.pio.Gpio
+import com.google.android.things.pio.PeripheralManager
 import java.io.IOException
-import java.util.*
+import java.nio.ByteBuffer
+import kotlin.concurrent.thread
 
 
 /**
@@ -30,25 +46,56 @@ import java.util.*
  * @see <a href="https://github.com/androidthings/contrib-drivers#readme">https://github.com/androidthings/contrib-drivers#readme</a>
  *
  */
-class MainActivity : Activity() {
-    private val mHandler = Handler()
-    private val testEngine = Handler()
+class MainActivity : AppCompatActivity() {
+    val TAG = MainActivity::class.java.simpleName
+    private val service = PeripheralManager.getInstance()
 
     var engine: EnginesController? = null
     var led: LEDController? = null
-
-    private lateinit var gattServer: GattServer
+    val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+    var thread: ClientThread? = null
 
     var connected = false
+
+    /*val enableIr: Gpio? by lazy {
+        try {
+            service.openGpio(BoardDefaults.irEnable).apply {
+                setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW)
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
+    }*/
+
+    val obstacle = MutableLiveData<Boolean>()
+
+    val outIr: Gpio? by lazy {
+        try {
+            service.openGpio(BoardDefaults.irOut).apply {
+                setDirection(Gpio.DIRECTION_IN)
+                setEdgeTriggerType(Gpio.EDGE_BOTH)
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //setContentView(R.layout.activity_main)
 
+        val manager = BluetoothConfigManager.getInstance()
+// Report the local Bluetooth device class as a speaker
+        val deviceClass = BluetoothClassFactory.build(
+                BluetoothClass.Service.NETWORKING,
+                BluetoothClass.Device.AUDIO_VIDEO_VIDEO_GAMING_TOY)
+
+        manager.bluetoothClass = deviceClass
+
         try {
             //OUTPUT
-
-
             engine = EnginesController()
             led = LEDController()
 
@@ -64,156 +111,154 @@ class MainActivity : Activity() {
             intentFilter.addAction("DATA_CHANGED")
             registerReceiver(receiver, intentFilter)*/
 
+            led?.enable(LED.BLUE)
+
+            //enableIr?.value = false
+            //outIr?.value = true
+            Log.e(TAG, "${outIr?.value}")
+            outIr?.registerGpioCallback {
+                obstacle.postValue(!it.value)
+
+                true
+            }
+
+            /*kotlin.concurrent.thread (start = true) {
+                while (true) {
+                    if (outIr?.value != true) led?.enable(LED.GREEN)
+                    else led?.enable(LED.BLUE)
+                }
+            }*/
+
+            /*enableIr?.registerGpioCallback {
+                Log.e(TAG, "Enable IR ${it.value}")
+                if(it.value)
+                    led?.enable(LED.GREEN)
+                else
+                    led?.enable()
+
+                true
+            }*/
+
+            obstacle.observe(this, Observer {
+                if (it != null) {
+                    thread?.sendMessage(BluetoothInfo.allocate(BluetoothInfo.Message.OBSTACLE).apply {
+                        put((if (it) 1 else 0).toByte())
+                    })
+
+                    if (it) engine?.stopMoving()
+                    engine?.obstacle = it
+
+                    when {
+                        connected && it -> led?.enable(LED.RED, LED.GREEN)
+                        connected && !it -> led?.enable(LED.GREEN)
+                        !connected && !it -> led?.enable(LED.BLUE)
+                        !connected && it -> led?.enable(LED.RED, LED.BLUE)
+                    }
+                }
+            })
+
         } catch (e: IOException) {
             Log.e(TAG, "Error on PeripheralIO API", e)
         }
 
+        if (!bluetoothAdapter.isEnabled)
+            bluetoothAdapter.enable()
 
+        if (!bluetoothAdapter.isEnabled)
+            led?.enable(LED.RED)
 
-        gattServer = GattServer(this, callback)
+        bluetoothAdapter.startDiscovery()
 
-        if (!gattServer.start()) finish()
-    }
-
-    private val callback = object : GattServer.Callback {
-        override fun onConnectionChanged(connected: Boolean, device: BluetoothDevice) {
-            if (connected) {
-                this@MainActivity.connected = true
-                led?.red?.value = false
-                led?.green?.value = false
-                led?.blue?.value = false
-                led?.pulse(Speed.MEDIUM, LED.BLUE)
-            } else {
-                this@MainActivity.connected = false
-                led?.red?.value = false
-                led?.green?.value = false
-                led?.blue?.value = false
-                led?.pulse(Speed.LOW, LED.RED)
-                engine?.stopMoving()
-            }
-        }
-
-        override fun onCharacteristicChanged(uid: UUID, byteArray: ByteArray) {
-            when (byteArray[0]) {
-                0.toByte() -> engine?.stopMoving()
-                1.toByte() -> engine?.moveForward()
-                2.toByte() -> engine?.turnRight()
-                3.toByte() -> engine?.moveBackward()
-                4.toByte() -> engine?.turnLeft()
-            }
-
-            if (byteArray[1] == 0.toByte()) {
-                if (led?.light != false) {
-                    led?.light = false
-                }
-                led?.pulse(Speed.MEDIUM, LED.BLUE)
-            } else {
-                if (led?.light != true)
-                    led?.light = true
-            }
-        }
-    }
-
-    /*private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                "DATA_CHANGED" -> {
-                    when (intent.getByteExtra("DIRECTION", 0)) {
-                        0.toByte() -> engine?.stopMoving()
-                        1.toByte() -> engine?.moveForward()
-                        2.toByte() -> engine?.turnRight()
-                        3.toByte() -> engine?.moveBackward()
-                        4.toByte() -> engine?.turnLeft()
-                    }
-
-                    if (intent.getByteExtra("CMD", 0) == 0.toByte()) {
-                        if (led?.light != false) {
-                            led?.light = false
-                        }
-                        led?.pulse(Speed.MEDIUM, LED.BLUE)
-                    } else {
-                        if (led?.light != true)
-                            led?.light = true
-                    }
-                }
-                "CONNECTED" -> {
-                    connected = true
-                    led?.red?.value = false
-                    led?.green?.value = false
-                    led?.blue?.value = false
-                    led?.pulse(Speed.MEDIUM, LED.BLUE)
-                }
-                "DISCONNECTED" -> {
-                    connected = false
-                    led?.red?.value = false
-                    led?.green?.value = false
-                    led?.blue?.value = false
-                    led?.pulse(Speed.LOW, LED.RED)
-                    engine?.stopMoving()
-                }
-            }
-        }
-
-    }*/
-
-    override fun onResume() {
-        super.onResume()
-        if (connected)
-            led?.pulse(Speed.MEDIUM, LED.BLUE)
-        else
-            led?.pulse(Speed.LOW, LED.RED)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        led?.stopPulse()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mHandler.removeCallbacks(mBlinkRunnable)
-        testEngine.removeCallbacks(testEngineRunnable)
         try {
             led?.close()
             engine?.close()
+
+            outIr?.close()
+            //enableIr?.close()
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        //unregisterReceiver(receiver)
-        gattServer.stop()
-
     }
 
-    private val testEngineRunnable = object : Runnable {
-        override fun run() {
-
-            /* when(engine?.direction){
-                 EnginesController.Direction.FORWARD -> engine?.moveBackward()
-                 EnginesController.Direction.BACKWARD -> engine?.turnLeft()
-                 EnginesController.Direction.LEFT -> engine?.turnRight()
-                 else -> engine?.moveForward()
-             }*/
-            //engine?.moveForward()
-            engine?.stopMoving()
-
-            testEngine.postDelayed(this, 500)
-        }
-
+    override fun onStart() {
+        super.onStart()
+        registerReceiver(receiver, IntentFilter().apply {
+            addAction(BluetoothDevice.ACTION_FOUND)
+            addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+            addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+            addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED)
+        })
     }
 
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver(receiver)
+    }
 
-    private val mBlinkRunnable = object : Runnable {
-        override fun run() {
-            try {
-                // Toggle the GPIO state
-                led?.blink(LED.RED)
+    private val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent?) {
+            val action = intent?.action
+            when (action) {
 
-                // Reschedule the same runnable in {#INTERVAL_BETWEEN_BLINKS_MS} milliseconds
-                mHandler.postDelayed(this, 1000)
-            } catch (e: IOException) {
-                Log.e(TAG, "Error on PeripheralIO API", e)
+                BluetoothDevice.ACTION_FOUND -> {
+                    val device: BluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+
+                    if (device.name == BluetoothInfo.SERVER_NAME && !connected) {
+                        thread?.cancel()
+                        thread = ClientThread(device, bluetoothAdapter, object : BluetoothListener {
+                            override fun onConnectionChanged(connect: Boolean) {
+                                connected = connect
+                                if (connect) {
+                                    bluetoothAdapter.cancelDiscovery()
+                                    led?.enable(LED.GREEN)
+                                } else {
+                                    bluetoothAdapter.startDiscovery()
+                                    led?.enable(LED.BLUE)
+                                }
+                            }
+
+                            override fun onDataReceived(msg: BluetoothInfo.Message, data: ByteBuffer) {
+                                when (msg) {
+                                    BluetoothInfo.Message.ENABLE_LIGHT -> {
+                                        val enable = data.get() == 1.toByte()
+                                        led?.light = enable
+                                        thread?.sendMessage(BluetoothInfo.allocate(msg).apply {
+                                            put(if (enable) 1.toByte() else 0.toByte())
+                                        })
+                                    }
+
+                                    BluetoothInfo.Message.SET_DIRECTION -> {
+                                        val angle = data.float
+                                        val power = data.float
+                                        engine?.turn(angle.toDouble(), 100 * power.toDouble())
+                                    }
+
+                                    else -> {
+                                    }
+                                }
+                            }
+
+                        })
+                        thread?.start()
+                    }
+                }
+                BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
+                    if (!connected) bluetoothAdapter.startDiscovery()
+                }
+                BluetoothDevice.ACTION_ACL_DISCONNECTED, BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED -> {
+                    connected = false
+                    bluetoothAdapter.startDiscovery()
+                    thread?.cancel()
+                }
+
             }
-
         }
+
     }
+
+
 }

@@ -23,30 +23,32 @@ object BoardDefaults {
     private val DEVICE_IMX6UL_PICO = "imx6ul_pico"
     private val DEVICE_IMX7D_PICO = "imx7d_pico"
 
-    val ledRed = when(Build.DEVICE){
-        //DEVICE_RPI3 -> "BCM27"
+    val irOut = when(Build.DEVICE){
+    //DEVICE_RPI3 -> "BCM27"
+        //DEVICE_RPI3 -> "BCM17"
         DEVICE_RPI3 -> "BCM12"
         else -> throw IllegalStateException("Unknown Build.DEVICE " + Build.DEVICE)
     }
 
-    val ledGreen = when(Build.DEVICE){
-        DEVICE_RPI3 ->  "BCM17"
+    val irEnable = when(Build.DEVICE){
+        //DEVICE_RPI3 ->  "BCM27"
+        DEVICE_RPI3 ->  "BCM3"
         else -> throw IllegalStateException("Unknown Build.DEVICE " + Build.DEVICE)
     }
 
+    val ledRed = when(Build.DEVICE){
+        //DEVICE_RPI3 -> "BCM27"
+        DEVICE_RPI3 -> "BCM19"
+        else -> throw IllegalStateException("Unknown Build.DEVICE " + Build.DEVICE)
+    }
+
+    val ledGreen = when(Build.DEVICE){
+        DEVICE_RPI3 ->  "BCM22"
+        else -> throw IllegalStateException("Unknown Build.DEVICE " + Build.DEVICE)
+    }
     val ledBlue = when(Build.DEVICE){
         //DEVICE_RPI3 ->  "BCM4"
-        DEVICE_RPI3 ->  "BCM18"
-        else -> throw IllegalStateException("Unknown Build.DEVICE " + Build.DEVICE)
-    }
-
-    val enable1 = when(Build.DEVICE){
-        DEVICE_RPI3 ->  "BCM19"
-        else -> throw IllegalStateException("Unknown Build.DEVICE " + Build.DEVICE)
-    }
-
-    val enable2 = when(Build.DEVICE){
-        DEVICE_RPI3 ->  "BCM26"
+        DEVICE_RPI3 ->  "BCM23"
         else -> throw IllegalStateException("Unknown Build.DEVICE " + Build.DEVICE)
     }
 
@@ -56,7 +58,7 @@ object BoardDefaults {
     }
 
     val motor2A = when(Build.DEVICE){
-        DEVICE_RPI3 ->  "BCM12"
+        DEVICE_RPI3 ->  "BCM5"
         else -> throw IllegalStateException("Unknown Build.DEVICE " + Build.DEVICE)
     }
 

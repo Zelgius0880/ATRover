@@ -8,7 +8,7 @@
         <item name="colorAccent">@color/md_indigo_400</item>
     </style>
 
-    <style name="ScanningDialog" parent="Theme.AppCompat.Dialog.Alert">
+    <style name="ScanningDialog" parent="Theme.AppCompat.Dialog">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/md_indigo_400</item>

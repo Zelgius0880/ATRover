@@ -57,8 +57,8 @@
             android:layout_height="70dp"
             android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp"
-            app:arcColor="#00ffff"
-            app:arcWidth="2dp"
+            app:arcColor="@color/md_green_400"
+            app:arcWidth="3dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 

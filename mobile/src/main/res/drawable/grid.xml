@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <rotate
+            android:fromDegrees="90"
+            android:toDegrees="90"
+            android:pivotX="50%"
+            android:pivotY="50%" >
+            <shape
+                android:shape="line"
+                android:top="1dip" >
+                <stroke
+                    android:color="@color/md_blue_grey_200"
+                    android:width="1dip"
+                    />
+            </shape>
+        </rotate>
+    </item>
+
+    <item>
+        <rotate >
+            <shape
+                android:shape="line"
+                android:top="1dip" >
+                <stroke
+                    android:color="@color/md_blue_grey_200"
+                    android:width="1dip"
+                    />
+            </shape>
+        </rotate>
+    </item>
+
+    <item>
+        <rotate
+            android:fromDegrees="45"
+            android:toDegrees="45"
+            android:pivotX="50%"
+            android:pivotY="50%" >
+            <shape
+                android:shape="line"
+                android:top="1dip" >
+                <stroke
+                    android:color="@color/md_blue_grey_200"
+                    android:dashWidth="10dp"
+                    android:dashGap="10dp"
+                    android:width="1dip"
+                    />
+            </shape>
+        </rotate>
+    </item>
+
+    <item>
+        <rotate
+            android:fromDegrees="-45"
+            android:toDegrees="-45"
+            android:pivotX="50%"
+            android:pivotY="50%" >
+            <shape
+                android:shape="line"
+                android:top="1dip" >
+                <stroke
+                    android:dashWidth="10dp"
+                    android:color="@color/md_blue_grey_200"
+                    android:dashGap="10dp"
+                    android:width="1dip"
+                    />
+            </shape>
+        </rotate>
+    </item>
+</layer-list>

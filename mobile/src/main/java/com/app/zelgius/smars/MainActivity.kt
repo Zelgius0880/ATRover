@@ -1,18 +1,34 @@
 package com.app.zelgius.smars
 
+import android.Manifest
+import android.app.Activity
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
-import android.graphics.drawable.Animatable
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
-import android.support.design.widget.Snackbar
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        const val REQUEST_ENABLE_BT = 15
+        const val DISCOVABLE_TIME = 300
+    }
+
+
 
     private lateinit var viewModel: MainViewModel
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
@@ -59,9 +75,6 @@ class MainActivity : AppCompatActivity() {
                     } catch (e: NullPointerException) {
                         e.printStackTrace()
                     }
-
-                    if (viewModel.characteristic == null)
-                        Snackbar.make(container, R.string.failed_to_connect, Snackbar.LENGTH_LONG).show()
                 }
             }
         })
@@ -86,17 +99,6 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        connect.setOnClickListener({
-            if (viewModel.connected.value != true) {
-                DialogFindDevice.newInstance().let {
-                    it.listener = {
-                        viewModel.connect(it)
-                    }
-                    it.show(supportFragmentManager, "dialog_device")
-                }
-            } else viewModel.disconnect()
-        })
-
         viewModel.needRefresh.observe(this, Observer {
             if (it == true) {
                 viewModel.needRefresh.value = false
@@ -105,24 +107,71 @@ class MainActivity : AppCompatActivity() {
         viewModel.needRefresh.value = true
 
         light.setOnClickListener({
-            if(viewModel.connected.value == true) {
+            if (viewModel.connected.value == true) {
                 if (!viewModel.ledOn) {
-                    light.drawable.let {
-                        (it as? AnimatedVectorDrawable)?.start()
-                    }
-                    light.backgroundTintList = ColorStateList.valueOf(getColor(R.color.md_yellow_200))
                     viewModel.enableLight(true)
                 } else {
-                    light.drawable.let {
-                        (it as? AnimatedVectorDrawable)?.reset()
-                    }
-                    light.backgroundTintList = ColorStateList.valueOf(getColor(R.color.white))
                     viewModel.enableLight(false)
                 }
 
                 viewModel.ledOn = !viewModel.ledOn
             }
         })
+
+        viewModel.light.observe(this, Observer {
+            if(it == true){
+                light.drawable.apply {
+                    (this as? AnimatedVectorDrawable)?.start()
+                }
+                light.backgroundTintList = ColorStateList.valueOf(getColor(R.color.md_yellow_200))
+            } else {
+                light.drawable.let {
+                    (it as? AnimatedVectorDrawable)?.reset()
+                }
+                light.backgroundTintList = ColorStateList.valueOf(getColor(R.color.white))
+            }
+        })
+
+
+
+        connect.setOnClickListener({
+            if(viewModel.connected.value == false)startDiscovery()
+            else {
+                viewModel.connected.value = false
+                viewModel.disconnect()
+            }
+        })
+
+        viewModel.enabled.value = viewModel.bluetoothAdapter.isEnabled
+        if (viewModel.enabled.value != true) {
+            val enableBtIntent = Intent(ACTION_REQUEST_ENABLE)
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                    42)
+        } else startDiscovery()
+
     }
 
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == 42 && grantResults.size == 2
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+            startDiscovery()
+        }
+    }
+
+    private fun startDiscovery(){
+        val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
+        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, DISCOVABLE_TIME)
+        startActivity(discoverableIntent)
+    }
 }

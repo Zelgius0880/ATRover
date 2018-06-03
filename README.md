@@ -5,7 +5,9 @@ For now, it used Bluetooth LE to control the rover but it reveals quite ineffice
 Replacing BLE by normal Bluetooth will comming soon.
 
 
-# Hardware
+# Hardware (Deprecated)
+The hardware connection documentation need to be modified.
+
 
 - Raspberry Py 3
 - L293D Channel Motor Driver  ([Link](https://www.banggood.com/1pc-L293D-L293-L293B-DIP-SOP-Push-Pull-Four-Channel-Motor-Driver-IC-p-909310.html?rmmds=myorder&cur_warehouse=USA)). [Datasheet](http://www.ti.com/lit/ds/symlink/l293.pdf)
@@ -13,6 +15,8 @@ Replacing BLE by normal Bluetooth will comming soon.
 - 2x [N20 DC 6V 150RPM](http://www.dx.com/p/425975) Motor
 - Lithium Battery ([Link](https://www.banggood.com/V1_0-Lithium-Battery-Expansion-Board-For-Cellphone-Raspberry-Pi-3-Model-B-Pi-2B-B-p-1059297.html?rmmds=myorder&cur_warehouse=CN))
 - 9v Battery
+- Keyes IR obstacle avoidance sensor
+
 
 ## Connecting
 ### LD293 - Raspberry
