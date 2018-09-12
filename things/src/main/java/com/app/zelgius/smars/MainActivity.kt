@@ -17,6 +17,7 @@ import android.util.Log
 import com.app.zelgius.shared.BluetoothInfo
 import com.app.zelgius.shared.BluetoothListener
 import com.app.zelgius.shared.ClientThread
+import com.app.zelgius.shared.Direction
 import com.google.android.things.bluetooth.BluetoothClassFactory
 import com.google.android.things.bluetooth.BluetoothConfigManager
 import com.google.android.things.pio.Gpio
@@ -87,10 +88,10 @@ class MainActivity : AppCompatActivity() {
         //setContentView(R.layout.activity_main)
 
         val manager = BluetoothConfigManager.getInstance()
-// Report the local Bluetooth device class as a speaker
+
         val deviceClass = BluetoothClassFactory.build(
                 BluetoothClass.Service.NETWORKING,
-                BluetoothClass.Device.AUDIO_VIDEO_VIDEO_GAMING_TOY)
+                BluetoothClass.Device.TOY_ROBOT)
 
         manager.bluetoothClass = deviceClass
 
@@ -99,7 +100,6 @@ class MainActivity : AppCompatActivity() {
             engine = EnginesController()
             led = LEDController()
 
-            Log.i(TAG, "Start blinking LED GPIO pin")
             // Post a Runnable that continuously switch the state of the GPIO, blinking the
             // corresponding LED
             //mHandler.post(mBlinkRunnable)
@@ -115,11 +115,10 @@ class MainActivity : AppCompatActivity() {
 
             //enableIr?.value = false
             //outIr?.value = true
-            Log.e(TAG, "${outIr?.value}")
             outIr?.registerGpioCallback {
                 obstacle.postValue(!it.value)
 
-                true
+                true //listening again
             }
 
             /*kotlin.concurrent.thread (start = true) {
@@ -161,11 +160,20 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, "Error on PeripheralIO API", e)
         }
 
-        if (!bluetoothAdapter.isEnabled)
+        if (!bluetoothAdapter.isEnabled) {
             bluetoothAdapter.enable()
+            led?.enable(LED.RED, LED.GREEN)
+            Handler().postDelayed({
+                if (!bluetoothAdapter.isEnabled) {
+                    led?.enable(LED.RED)
+                    error("Failed to activate Bluetooth")
+                } else {
+                    led?.enable(LED.BLUE)
+                    bluetoothAdapter.startDiscovery()
+                }
+            }, 12000)
+        }
 
-        if (!bluetoothAdapter.isEnabled)
-            led?.enable(LED.RED)
 
         bluetoothAdapter.startDiscovery()
 
@@ -232,9 +240,15 @@ class MainActivity : AppCompatActivity() {
                                     }
 
                                     BluetoothInfo.Message.SET_DIRECTION -> {
-                                        val angle = data.float
+                                        val direction = Direction.convert(data.get())
                                         val power = data.float
-                                        engine?.turn(angle.toDouble(), 100 * power.toDouble())
+                                        engine?.turn(direction, power.toDouble())
+                                    }
+
+                                    BluetoothInfo.Message.SET_POWER -> {
+                                        val power1 = data.float
+                                        val power2 = data.float
+                                        engine?.setPower(power1.toDouble(), power2.toDouble())
                                     }
 
                                     else -> {

@@ -7,7 +7,7 @@ import java.io.IOException
 
 
 class LEDController {
-    private val service = PeripheralManager.getInstance()
+    private val peripheralManager = PeripheralManager.getInstance()
     var red: Gpio
     var blue: Gpio
     var green: Gpio
@@ -29,13 +29,13 @@ class LEDController {
 
     init {
         try {
-            green = service.openGpio(BoardDefaults.ledGreen)
+            green = peripheralManager.openGpio(BoardDefaults.ledGreen)
             green.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW)
 
-            blue = service.openGpio(BoardDefaults.ledBlue)
+            blue = peripheralManager.openGpio(BoardDefaults.ledBlue)
             blue.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW)
 
-            red = service.openGpio(BoardDefaults.ledRed)
+            red = peripheralManager.openGpio(BoardDefaults.ledRed)
             red.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW)
 
         } catch (e: IOException) {

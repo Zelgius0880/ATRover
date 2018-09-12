@@ -11,6 +11,8 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SeekBar
+import com.app.zelgius.shared.Direction
 import kotlinx.android.synthetic.main.fragment_remote.*
 
 
@@ -39,40 +41,55 @@ class RemoteFragment : Fragment() {
 
         viewModel.direction.observe(this, Observer{
             if(it!=null) {
-                angleText.text = String.format("%.2f°", it.angle)
-                powerText.text = String.format("%.2f%%", it.power)
             }
         })
 
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                power.text = String.format("%d%%", progress)
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+
+        })
+
+        power.text = String.format("%d%%", 100)
 
         viewModel.obstacle.observe(this, Observer {
             if(it == true){
-                remote.backgroundTintList = ColorStateList.valueOf(activity!!.getColor(R.color.md_red_500))
+                top.backgroundTintList = ColorStateList.valueOf(activity!!.getColor(R.color.md_red_500))
             } else {
-                remote.backgroundTintList = ColorStateList.valueOf(activity!!.getColor(R.color.colorPrimaryDark))
+                top.backgroundTintList = ColorStateList.valueOf(activity!!.getColor(R.color.colorPrimaryDark))
             }
         })
 
-        joystick.setJoystickListener(object : JoystickListener{
-            override fun onDown() {
+        top.setOnTouchListener(TouchListener(Direction.FORWARD))
+        left.setOnTouchListener(TouchListener(Direction.LEFT))
+        right.setOnTouchListener(TouchListener(Direction.RIGHT))
+        bottom.setOnTouchListener(TouchListener(Direction.BACKWARD))
+    }
 
+    inner class TouchListener(private val direction: Direction): View.OnTouchListener{
+        override fun onTouch(v: View?, e: MotionEvent?): Boolean {
+            if(viewModel.connected.value == true) {
+                v?.performClick()
+                when (e?.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        viewModel.setDirection(direction, seekBar.progress.toFloat())
+                        return true
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        viewModel.setDirection(Direction.STOP, 0f)
+                        return true
+                    }
+                }
             }
 
-            override fun onDrag(degrees: Float, offset: Float) {
-                angleText.text = String.format("%.2f°", degrees)
-                powerText.text = String.format("%.2f%%", offset*100)
+            return false
+        }
 
-                viewModel.setDirection(degrees, offset)
-            }
-
-            override fun onUp() {
-                angleText.text = String.format("%.2f°", 0.0)
-                powerText.text = String.format("%.2f%%", 0.0)
-
-                viewModel.setDirection(0.0f, 0.0f)
-            }
-
-        })
     }
 
     companion object {

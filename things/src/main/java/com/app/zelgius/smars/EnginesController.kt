@@ -1,6 +1,7 @@
 package com.app.zelgius.smars
 
 import android.util.Log
+import com.app.zelgius.shared.Direction
 import com.google.android.things.pio.Gpio
 import com.google.android.things.pio.PeripheralManager
 import com.google.android.things.pio.Pwm
@@ -13,8 +14,8 @@ class EnginesController {
     private val motor2: Gpio?
     private val motor3: Gpio?
     private val motor4: Gpio?
-    private val enable1: Pwm?
-    private val enable2: Pwm?
+    private val enable1: Pwm? //right
+    private val enable2: Pwm? //left
 
     var obstacle = false
 
@@ -22,19 +23,6 @@ class EnginesController {
 
     var lastAngle = 0.0
 
-    enum class Direction {
-        FORWARD, BACKWARD, RIGHT, LEFT, STOP;
-
-        operator fun not(): Direction {
-            return when (this) {
-                LEFT -> RIGHT
-                RIGHT -> LEFT
-                FORWARD -> BACKWARD
-                BACKWARD -> FORWARD
-                else -> STOP
-            }
-        }
-    }
 
     init {
         try {
@@ -42,7 +30,7 @@ class EnginesController {
 
             enable2 = service.openPwm("PWM1")
 
-            enable1?.setPwmFrequencyHz(580.0)
+            enable1?.setPwmFrequencyHz(580.0) // arbitrary value
             enable1?.setPwmDutyCycle(100.0)
             // Enable the PWM signal
             enable1?.setEnabled(true)
@@ -148,6 +136,34 @@ class EnginesController {
 
         enable2?.setPwmDutyCycle(Math.abs(power))
         moveLeftSide(finalDirection)
+    }
+
+    fun turn(direction: Direction, power: Double = 100.0) {
+
+        when(direction){
+            Direction.FORWARD -> moveForward()
+            Direction.RIGHT -> turnRight()
+            Direction.BACKWARD -> moveBackward()
+            Direction.LEFT -> turnLeft()
+            Direction.STOP -> stopMoving()
+        }
+
+        if(direction != Direction.STOP){
+            enable1?.setPwmDutyCycle(Math.abs(power))
+            enable2?.setPwmDutyCycle(Math.abs(power))
+        }
+    }
+
+    fun setPower(left: Double,right: Double){
+        enable1?.setPwmDutyCycle(Math.abs(right))
+        enable2?.setPwmDutyCycle(Math.abs(left))
+
+        if(left >0) moveLeftSide(Direction.FORWARD)
+        else moveLeftSide(Direction.BACKWARD)
+
+
+        if(right >0) moveRightSide(Direction.FORWARD)
+        else moveRightSide(Direction.BACKWARD)
     }
 
     fun turn(angle: Double, power: Double = 100.0) {

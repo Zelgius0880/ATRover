@@ -9,8 +9,9 @@ import kotlin.concurrent.thread
 class BluetoothInfo {
     enum class Message(val protocol: Int, val length: Int) {
         ENABLE_LIGHT(0, 1),
-        SET_DIRECTION(1, 8),
-        OBSTACLE(2, 1);
+        SET_DIRECTION(1, 5),
+        OBSTACLE(2, 1),
+        SET_POWER(3, 8);
         //0-3 : angle
         //4-7 : power pct
 
@@ -23,6 +24,7 @@ class BluetoothInfo {
                 0 -> Message.ENABLE_LIGHT
                 1 -> Message.SET_DIRECTION
                 2 -> Message.OBSTACLE
+                3 -> Message.SET_POWER
                 else -> throw IllegalStateException("Unknown protocol $protocol")
             }
         }

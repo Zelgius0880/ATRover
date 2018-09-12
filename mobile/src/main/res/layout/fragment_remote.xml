@@ -6,83 +6,96 @@
     tools:context="com.app.zelgius.smars.RemoteFragment">
 
 
-    <android.support.design.widget.FloatingActionButton
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_marginBottom="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <View
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:layout_marginBottom="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/grid"
-        android:elevation="16dp"
+        android:id="@+id/guide"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.app.zelgius.smars.Joystick
-        android:id="@+id/joystick"
-        android:layout_width="300dp"
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/top"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:clickable="true"
+        android:src="@drawable/ic_keyboard_arrow_up_black_24dp"
+        app:layout_constraintEnd_toEndOf="@+id/guide"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/guide"
+        app:layout_constraintTop_toTopOf="@+id/guide" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/bottom"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:clickable="true"
+        android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
+        app:layout_constraintBottom_toBottomOf="@+id/guide"
+        app:layout_constraintEnd_toEndOf="@+id/guide"
+        app:layout_constraintStart_toStartOf="@+id/guide" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/left"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:clickable="true"
+        android:src="@drawable/ic_keyboard_arrow_left_black_24dp"
+        app:layout_constraintBottom_toBottomOf="@+id/guide"
+        app:layout_constraintStart_toStartOf="@+id/guide"
+        app:layout_constraintTop_toTopOf="@+id/guide" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/right"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:clickable="true"
+        android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
+        app:layout_constraintBottom_toBottomOf="@+id/guide"
+        app:layout_constraintEnd_toEndOf="@+id/guide"
+        app:layout_constraintTop_toTopOf="@+id/guide" />
+
+    <com.app.zelgius.smars.VerticalSeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="32dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:elevation="17dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:max="100"
+        android:min="0"
+        android:progress="100"
+        app:layout_constraintBottom_toBottomOf="@+id/bottom"
+        app:layout_constraintEnd_toStartOf="@+id/left"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/remote"
-            android:layout_width="75dp"
-            android:layout_height="75dp"
-            android:layout_marginBottom="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="32dp"
-            app:backgroundTint="@color/colorPrimaryDark"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </com.app.zelgius.smars.Joystick>
+        app:layout_constraintTop_toTopOf="@+id/guide" />
 
     <TextView
-        android:id="@+id/angleText"
+        android:id="@+id/power"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <TextView
-        android:id="@+id/powerText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/angleText"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintBottom_toTopOf="@+id/seekBar"
+        app:layout_constraintEnd_toEndOf="@+id/seekBar"
+        app:layout_constraintStart_toStartOf="@+id/seekBar"
+        tools:text="100%" />
 
 
 </android.support.constraint.ConstraintLayout>

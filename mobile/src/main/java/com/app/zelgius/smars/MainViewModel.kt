@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import com.app.zelgius.shared.BluetoothInfo
 import com.app.zelgius.shared.BluetoothListener
+import com.app.zelgius.shared.Direction
 import com.app.zelgius.shared.ServerThread
 import java.nio.ByteBuffer
 
@@ -58,10 +59,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
-    fun setDirection(angle: Float, power: Float){
+    fun setDirection(direction: Direction, power: Float){
         thread?.sendMessage(BluetoothInfo.allocate(BluetoothInfo.Message.SET_DIRECTION).apply {
-            putFloat(angle)
+            put(Direction.convert(direction))
             putFloat(power)
+        })
+    }
+
+
+    fun setPower(power1: Float, power2: Float){
+        thread?.sendMessage(BluetoothInfo.allocate(BluetoothInfo.Message.SET_POWER).apply {
+            putFloat(power1)
+            putFloat(power2)
         })
     }
 

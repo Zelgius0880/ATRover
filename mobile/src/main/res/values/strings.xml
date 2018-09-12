@@ -4,7 +4,7 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="remote_controller">Remote Controller</string>
-    <string name="gyro_controller">Gyro Controller</string>
+    <string name="gyro_controller">Another Remote Controller</string>
     <string name="go_alone">Go Alone</string>
 
     <string name="connect_to">Connect to</string>

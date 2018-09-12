@@ -7,8 +7,8 @@
         android:title="@string/remote_controller" />
 
     <item
-        android:id="@+id/navigation_gyro"
-        android:icon="@drawable/ic_screen_rotation_black_24dp"
+        android:id="@+id/navigation_remote_2"
+        android:icon="@drawable/ic_border_vertical_black_24dp"
         android:title="@string/gyro_controller" />
 
     <item

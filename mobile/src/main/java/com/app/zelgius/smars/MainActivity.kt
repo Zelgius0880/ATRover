@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val REQUEST_ENABLE_BT = 15
-        const val DISCOVABLE_TIME = 300
+        const val DISCOVERABLE_TIME = 300
     }
 
 
@@ -39,7 +39,10 @@ class MainActivity : AppCompatActivity() {
                         .commit()
                 return@OnNavigationItemSelectedListener true
             }
-            R.id.navigation_gyro -> {
+            R.id.navigation_remote_2-> {
+                supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment, Remote2Fragment.newInstance())
+                        .commit()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_alone -> {
@@ -106,7 +109,7 @@ class MainActivity : AppCompatActivity() {
         })
         viewModel.needRefresh.value = true
 
-        light.setOnClickListener({
+        light.setOnClickListener {
             if (viewModel.connected.value == true) {
                 if (!viewModel.ledOn) {
                     viewModel.enableLight(true)
@@ -116,7 +119,7 @@ class MainActivity : AppCompatActivity() {
 
                 viewModel.ledOn = !viewModel.ledOn
             }
-        })
+        }
 
         viewModel.light.observe(this, Observer {
             if(it == true){
@@ -134,13 +137,13 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        connect.setOnClickListener({
+        connect.setOnClickListener {
             if(viewModel.connected.value == false)startDiscovery()
             else {
                 viewModel.connected.value = false
                 viewModel.disconnect()
             }
-        })
+        }
 
         viewModel.enabled.value = viewModel.bluetoothAdapter.isEnabled
         if (viewModel.enabled.value != true) {
@@ -171,7 +174,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startDiscovery(){
         val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
-        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, DISCOVABLE_TIME)
+        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, DISCOVERABLE_TIME)
         startActivity(discoverableIntent)
     }
 }
